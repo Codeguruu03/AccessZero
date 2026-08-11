@@ -25,8 +25,27 @@ spring:
       hibernate:
         format_sql: true
 
+accesszero:
+  keycloak:
+    server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8081}
+    realm: ${KEYCLOAK_REALM:accesszero-realm}
+    admin-username: ${KEYCLOAK_ADMIN_USER:admin}
+    admin-password: ${KEYCLOAK_ADMIN_PASS:admin}
+    client-id: ${KEYCLOAK_CLIENT_ID:admin-cli}
+    mock-mode: ${KEYCLOAK_MOCK_MODE:true}
+
+  ldap:
+    url: ${LDAP_URL:ldap://localhost:389}
+    base-dn: ${LDAP_BASE_DN:dc=company,dc=com}
+    admin-dn: ${LDAP_ADMIN_DN:cn=admin,dc=company,dc=com}
+    admin-password: ${LDAP_ADMIN_PASS:adminpassword}
+    user-search-base: ou=users
+    group-search-base: ou=groups
+    mock-mode: ${LDAP_MOCK_MODE:true}
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics
+

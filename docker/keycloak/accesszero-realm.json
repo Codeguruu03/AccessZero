@@ -1,0 +1,28 @@
+{
+  "realm": "accesszero-realm",
+  "enabled": true,
+  "users": [
+    {
+      "username": "rahul.sharma",
+      "enabled": true,
+      "email": "rahul.sharma@company.com",
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "accesszero-client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "accesszero-secret-12345"
+    }
+  ]
+}

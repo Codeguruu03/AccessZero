@@ -1,0 +1,48 @@
+dn: ou=users,dc=company,dc=com
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=company,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+# User: rahul.sharma
+dn: cn=rahul.sharma,ou=users,dc=company,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: rahul.sharma
+sn: Sharma
+givenName: Rahul
+mail: rahul.sharma@company.com
+uid: rahul.sharma
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/rahul.sharma
+userPassword: {SSHA}password123
+
+# Groups
+dn: cn=employees,ou=groups,dc=company,dc=com
+objectClass: groupOfNames
+cn: employees
+member: cn=rahul.sharma,ou=users,dc=company,dc=com
+
+dn: cn=finance,ou=groups,dc=company,dc=com
+objectClass: groupOfNames
+cn: finance
+member: cn=rahul.sharma,ou=users,dc=company,dc=com
+
+dn: cn=payroll-admin,ou=groups,dc=company,dc=com
+objectClass: groupOfNames
+cn: payroll-admin
+member: cn=rahul.sharma,ou=users,dc=company,dc=com
+
+dn: cn=vpn-users,ou=groups,dc=company,dc=com
+objectClass: groupOfNames
+cn: vpn-users
+member: cn=rahul.sharma,ou=users,dc=company,dc=com
+
+dn: cn=quarantined,ou=groups,dc=company,dc=com
+objectClass: groupOfNames
+cn: quarantined
+member: cn=admin,dc=company,dc=com

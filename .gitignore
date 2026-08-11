@@ -1,0 +1,41 @@
+# Compiled class files & build directories
+target/
+*.class
+
+# Package Files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Log files
+*.log
+logs/
+
+# H2 / Embedded DB data files
+*.db
+*.db.mv.db
+*.h2.db
+
+# IDE specific files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Operating System specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Docker local data directories
+docker-data/
+postgres_data/
+
+# Environment configuration overrides
+.env
+.env.local
