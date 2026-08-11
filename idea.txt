@@ -1,0 +1,891 @@
+Project: AccessZero
+Identity Breach Containment & Access Revocation Platform
+One-line idea
+
+AccessZero allows an IT administrator to instantly determine and eliminate everything a compromised employee can access across an organization's identity infrastructure.
+
+Think:
+
+"What can this person access right now, and if their account is compromised, can I kill that access everywhere in seconds?"
+
+That is the product.
+
+Not an IAM clone.
+
+Not an SSO demo.
+
+Not a user-management system.
+
+Why this is a serious IT-admin problem
+
+Imagine an employee:
+
+Employee: Rahul
+Department: Finance
+
+Their identity may have access to:
+
+                    Rahul
+                      │
+          ┌───────────┼───────────┐
+          ↓           ↓           ↓
+       Keycloak     LDAP       Azure AD*
+          │
+     ┌────┼────┬────────┐
+     ↓    ↓    ↓        ↓
+   Jira GitLab VPN   Internal App
+     │
+     ↓
+  Finance Group
+     │
+     ↓
+Payroll Application
+
+Now suppose Rahul's credentials are compromised.
+
+The IT admin needs to answer:
+
+"What can Rahul access?"
+
+and then:
+
+"How do I shut all of it down immediately?"
+
+Normally this can involve:
+
+disabling the account
+removing LDAP groups
+revoking OAuth tokens
+terminating sessions
+invalidating refresh tokens
+removing application assignments
+terminating SSO sessions
+disabling service access
+checking active sessions
+checking inherited permissions
+
+That is where AccessZero comes in.
+
+The Core Workflow
+
+The entire application revolves around this:
+
+          SECURITY INCIDENT
+                 │
+                 ▼
+        Identify compromised
+             identity
+                 │
+                 ▼
+          ACCESS ANALYSIS
+                 │
+                 ▼
+       Calculate Blast Radius
+                 │
+                 ▼
+       Admin reviews impact
+                 │
+                 ▼
+        "CONTAIN IDENTITY"
+                 │
+                 ▼
+     ┌───────────┼───────────┐
+     ↓           ↓           ↓
+   LDAP       Keycloak    Applications
+     │           │           │
+     ↓           ↓           ↓
+ Groups      Sessions     SSO Access
+     │           │           │
+     └───────────┼───────────┘
+                 ↓
+          ACCESS REVOKED
+                 │
+                 ▼
+           VERIFY ZERO
+             ACCESS
+
+That's the entire product.
+
+The Killer Feature
+"Kill Switch"
+
+Imagine the administrator sees:
+
+┌─────────────────────────────────────────────┐
+│          IDENTITY COMPROMISED               │
+├─────────────────────────────────────────────┤
+│                                             │
+│ User: rahul.sharma                          │
+│ Risk: CRITICAL                              │
+│                                             │
+│ Active Sessions:             7              │
+│ OAuth Tokens:                14              │
+│ LDAP Groups:                  9              │
+│ Applications:                18              │
+│ SAML Applications:            4              │
+│                                             │
+│ Estimated Access Paths:       47             │
+│                                             │
+│       [ CALCULATE BLAST RADIUS ]             │
+│                                             │
+│       [ 🚨 CONTAIN IDENTITY ]               │
+└─────────────────────────────────────────────┘
+
+Admin clicks:
+
+CONTAIN IDENTITY
+
+AccessZero executes the containment workflow.
+
+What happens internally
+Step 1 — Disable Identity
+
+Keycloak:
+
+User Enabled
+      ↓
+FALSE
+Step 2 — Revoke OAuth/OIDC access
+
+Invalidate:
+
+Access Tokens
+Refresh Tokens
+Sessions
+Step 3 — LDAP containment
+
+OpenLDAP:
+
+User
+ ↓
+Group memberships
+ ↓
+Remove privileged memberships
+
+For example:
+
+Before
+
+rahul
+ ├── employees
+ ├── finance
+ ├── payroll-admin
+ ├── reporting
+ └── vpn-users
+
+
+After
+
+rahul
+ └── quarantined
+Step 4 — SAML containment
+
+For SAML-connected applications, AccessZero tracks the identity's application assignments and supported logout/session mechanisms.
+
+Important: SAML doesn't provide a universal "revoke every session everywhere" mechanism, so your project should explicitly model the difference between:
+
+Identity disabled
+Session terminated
+Application access revoked
+Application requires local session expiry
+
+That nuance makes the project more realistic, not less.
+
+Step 5 — Verify
+
+This is where the project gets interesting.
+
+Don't just say:
+
+"Revocation succeeded."
+
+AccessZero performs verification.
+
+For example:
+
+Identity
+   │
+   ├── Keycloak
+   │     └── ❌ Access
+   │
+   ├── LDAP
+   │     └── ❌ Privileged groups
+   │
+   ├── Application A
+   │     └── ❌ SSO
+   │
+   ├── Application B
+   │     └── ❌ OAuth
+   │
+   └── Application C
+         └── ⚠ Local session remains
+
+Then the administrator gets:
+
+                 CONTAINMENT RESULT
+
+Identity: Rahul Sharma
+
+Access Paths Found:       47
+Access Paths Revoked:     45
+Requires App Action:       2
+
+Containment Status:       PARTIAL
+
+⚠ Application C
+  Existing local session cannot be remotely terminated.
+
+⚠ Application F
+  Requires application-side logout.
+
+This is much more realistic than pretending IAM can magically revoke everything.
+
+The Innovative Part
+Access Blast Radius
+
+Before the admin clicks the kill switch:
+
+What happens if I disable Rahul?
+
+AccessZero calculates:
+
+Rahul
+ │
+ ├── Finance
+ │    ├── Payroll
+ │    ├── Expenses
+ │    └── Reporting
+ │
+ ├── Engineering
+ │    └── GitLab
+ │
+ └── Infrastructure
+      └── VPN
+
+And produces:
+
+Applications affected:       18
+
+Privileged applications:      4
+
+Sensitive groups:             3
+
+Active sessions:              7
+
+OAuth tokens:                14
+
+SAML sessions:                4
+
+Estimated access paths:      47
+
+This gives an IT administrator a decision before taking destructive action.
+
+Even Better: "What If?"
+
+Add one major capability:
+
+Containment Simulation
+
+The administrator can run:
+
+SIMULATE CONTAINMENT
+
+instead of actually revoking anything.
+
+AccessZero responds:
+
+SIMULATION
+
+Identity:
+rahul.sharma
+
+Would disable:
+    Keycloak account
+
+Would revoke:
+    14 OAuth refresh tokens
+
+Would terminate:
+    7 active sessions
+
+Would remove:
+    3 privileged LDAP memberships
+
+Would affect:
+    18 applications
+
+Potential disruption:
+    HIGH
+
+Proceed?
+
+Then:
+
+[ CANCEL ]
+
+[ EXECUTE CONTAINMENT ]
+
+This is extremely useful for IT administrators.
+
+Your Stack Fits Naturally
+
+And this is the important part.
+
+You gave me:
+
+Java
+Spring Boot
+Keycloak
+OAuth 2.0
+OIDC
+SAML 2.0
+OpenLDAP
+PostgreSQL
+Azure/AWS
+Docker
+Kubernetes
+Terraform
+Bash/PowerShell
+GitHub Actions/Azure DevOps
+
+Every component has a reason to exist.
+
+Technology	Purpose
+Java	Core containment engine
+Spring Boot	Identity control-plane API
+Keycloak	OAuth/OIDC identity provider
+OAuth 2.0	Token/session lifecycle
+OIDC	Authentication/session management
+SAML 2.0	Enterprise SSO integrations
+OpenLDAP	Enterprise directory + groups
+PostgreSQL	Identity/access relationship data
+Docker	Local IAM environment
+Kubernetes	Run AccessZero + identity services
+Terraform	Reproducible infrastructure
+Bash/PowerShell	Admin/incident automation
+GitHub Actions	CI/CD
+AWS/Azure	Optional deployment target
+Architecture
+                         IT ADMIN
+                            │
+                            ▼
+                    AccessZero Console
+                            │
+                            ▼
+                   Spring Boot API
+                            │
+              ┌─────────────┼─────────────┐
+              │             │             │
+              ▼             ▼             ▼
+       Identity Graph   Containment    Verification
+          Engine          Engine          Engine
+              │             │             │
+              └─────────────┼─────────────┘
+                            │
+          ┌─────────────────┼─────────────────┐
+          │                 │                 │
+          ▼                 ▼                 ▼
+      Keycloak           OpenLDAP        Applications
+          │                 │                 │
+          │                 │          ┌──────┼──────┐
+          │                 │          ▼      ▼      ▼
+          │                 │        OIDC   SAML   OAuth
+          │                 │
+          └─────────────────┼─────────────────┘
+                            │
+                            ▼
+                       PostgreSQL
+                            │
+                            ▼
+                       Audit Events
+Identity Graph
+
+This is probably the most technically interesting component.
+
+AccessZero builds a graph:
+
+USER
+ │
+ ├── GROUP
+ │     │
+ │     └── ROLE
+ │           │
+ │           └── APPLICATION
+ │
+ ├── SESSION
+ │
+ ├── TOKEN
+ │
+ └── SAML ASSIGNMENT
+
+Example:
+
+Rahul
+ │
+ ├── Finance
+ │     └── PayrollAdmin
+ │            └── Payroll System
+ │
+ ├── Engineering
+ │     └── GitLab
+ │
+ └── VPN Users
+        └── VPN
+
+Then the system calculates:
+
+USER → GROUP → ROLE → APPLICATION
+
+and
+
+USER → TOKEN → APPLICATION
+
+and
+
+USER → SESSION → APPLICATION
+
+That's how you calculate the access blast radius.
+
+PostgreSQL Model
+
+You could have tables like:
+
+users
+
+groups
+
+roles
+
+applications
+
+user_groups
+
+group_roles
+
+role_permissions
+
+user_sessions
+
+oauth_tokens
+
+saml_assignments
+
+access_paths
+
+containment_operations
+
+containment_actions
+
+verification_results
+
+audit_events
+
+The important table is:
+
+access_paths
+
+Example:
+
+user
+ ↓
+group
+ ↓
+role
+ ↓
+application
+ ↓
+permission
+Containment State Machine
+
+Don't simply use:
+
+ACTIVE
+INACTIVE
+
+Model the incident lifecycle:
+
+NORMAL
+   │
+   ▼
+SUSPECTED
+   │
+   ▼
+ANALYZING
+   │
+   ▼
+CONTAINMENT_PENDING
+   │
+   ▼
+CONTAINING
+   │
+   ▼
+VERIFYING
+   │
+   ├──────────────┐
+   ▼              ▼
+CONTAINED      PARTIAL
+   │              │
+   ▼              ▼
+RECOVERY       MANUAL_ACTION
+
+This gives you a great opportunity to demonstrate state-machine design in Java.
+
+Important Safety Feature
+
+Because this tool can perform destructive identity operations, add:
+
+Two-Person Approval
+
+For highly privileged identities:
+
+Admin A
+   │
+   ▼
+Request Containment
+   │
+   ▼
+Pending Approval
+   │
+   ▼
+Admin B
+   │
+   ▼
+Approve
+   │
+   ▼
+Execute
+
+This is a realistic enterprise security control.
+
+And again, it isn't an unrelated feature.
+
+It directly supports the identity containment problem.
+
+Audit Trail
+
+Every action is immutable:
+
+2026-08-12 10:31
+
+ADMIN: anil.admin
+
+ACTION:
+CONTAIN_IDENTITY
+
+TARGET:
+rahul.sharma
+
+REASON:
+Suspected credential compromise
+
+ACTIONS:
+✓ Keycloak disabled
+✓ OAuth refresh tokens revoked
+✓ 7 sessions terminated
+✓ LDAP privileged groups removed
+✓ SAML assignments disabled
+
+RESULT:
+45 / 47 paths contained
+
+STATUS:
+PARTIAL
+CLI
+
+This makes your project much more enterprise-like.
+
+Example:
+
+accesszero analyze --user rahul.sharma
+
+Output:
+
+Identity: rahul.sharma
+
+Applications: 18
+Groups: 9
+Roles: 12
+Sessions: 7
+Tokens: 14
+
+Privileged Access:
+4 applications
+
+Blast Radius:
+47 access paths
+
+Then:
+
+accesszero simulate --user rahul.sharma
+
+Then:
+
+accesszero contain --user rahul.sharma
+
+Then:
+
+accesszero verify --user rahul.sharma
+
+Bash/PowerShell fits naturally here.
+
+Kubernetes Deployment
+
+Your local cluster could look like:
+
+accesszero namespace
+│
+├── accesszero-api
+├── accesszero-worker
+├── postgres
+├── keycloak
+├── openldap
+│
+├── test-app-oidc
+├── test-app-saml
+└── test-app-oauth
+
+You can run this completely locally with:
+
+Minikube
+
+or
+
+Kind
+
+So you don't actually need AWS/Azure money during development.
+
+Terraform
+
+Terraform provisions:
+
+Kubernetes Namespace
+
+Deployments
+
+Services
+
+Secrets
+
+ConfigMaps
+
+PostgreSQL
+
+Keycloak
+
+OpenLDAP
+
+Test Applications
+
+So you can destroy and recreate your entire IAM laboratory:
+
+terraform destroy
+
+and:
+
+terraform apply
+
+That's a very good DevOps/IAM demonstration.
+
+CI/CD
+
+Your pipeline:
+
+Git Push
+    │
+    ▼
+GitHub Actions
+    │
+    ├── Compile
+    │
+    ├── Unit Tests
+    │
+    ├── Integration Tests
+    │
+    ├── Keycloak Tests
+    │
+    ├── LDAP Tests
+    │
+    ├── OAuth Tests
+    │
+    ├── OIDC Tests
+    │
+    ├── SAML Tests
+    │
+    ├── Terraform Validation
+    │
+    ├── Docker Build
+    │
+    └── Security Checks
+What Makes This Different
+
+Most IAM portfolio projects:
+
+Login
+ ↓
+SSO
+ ↓
+Dashboard
+ ↓
+Create User
+ ↓
+Assign Role
+
+AccessZero:
+
+              COMPROMISED IDENTITY
+                       │
+                       ▼
+               BUILD IDENTITY GRAPH
+                       │
+                       ▼
+               CALCULATE BLAST RADIUS
+                       │
+                       ▼
+                SIMULATE CONTAINMENT
+                       │
+                       ▼
+               ADMIN APPROVAL
+                       │
+                       ▼
+             REVOKE ACCESS EVERYWHERE
+                       │
+                       ▼
+                VERIFY CONTAINMENT
+                       │
+                       ▼
+              REPORT REMAINING RISK
+
+One problem.
+
+One central workflow.
+
+Huge functionality.
+
+Enterprise relevance.
+
+The killer demo
+
+This is how I would demonstrate it in an interview.
+
+Step 1
+
+Create:
+
+Rahul
+
+with access to:
+
+GitLab
+Jira
+Payroll
+VPN
+Internal Application
+
+through Keycloak + LDAP.
+
+Step 2
+
+Log Rahul into several applications.
+
+Now:
+
+Active Sessions = 5
+Step 3
+
+Pretend Rahul's credentials have been compromised.
+
+Open AccessZero.
+
+Rahul
+CRITICAL
+
+Click:
+
+Calculate Blast Radius
+
+It displays:
+
+5 active sessions
+12 OAuth tokens
+6 LDAP groups
+11 applications
+31 effective access paths
+Step 4
+
+Click:
+
+Simulate Containment
+
+AccessZero shows exactly what will happen.
+
+Step 5
+
+Click:
+
+🚨 CONTAIN IDENTITY
+
+Step 6
+
+AccessZero executes the operations.
+
+Step 7
+
+Click:
+
+VERIFY
+
+And you get:
+
+                    ACCESSZERO
+
+Identity: Rahul
+
+Access Paths:             31
+Revoked:                  29
+Manual Action Required:    2
+
+Keycloak:                 CONTAINED
+LDAP:                     CONTAINED
+OAuth:                    CONTAINED
+OIDC:                     CONTAINED
+SAML:                     PARTIAL
+
+Overall Status:
+⚠ PARTIALLY CONTAINED
+
+That last result is actually better than showing 100% success because it demonstrates that your system understands real-world IAM limitations.
+
+Resume Version
+AccessZero — Identity Breach Containment & Access Revocation Platform
+
+Java | Spring Boot | Keycloak | OAuth 2.0 | OIDC | SAML 2.0 | OpenLDAP | PostgreSQL | Docker | Kubernetes | Terraform | GitHub Actions
+
+Built an enterprise identity containment platform that calculates an identity's effective access blast radius and orchestrates controlled access revocation across Keycloak, OpenLDAP, OAuth/OIDC sessions, and SAML-integrated applications. Implemented containment simulation, multi-admin approval, identity graph analysis, automated verification, and immutable audit trails, with infrastructure deployed through Terraform and Kubernetes.
+
+Why I would choose this over a generic IAM project
+
+Because in an interview, you can talk about real IAM engineering problems:
+
+OAuth token revocation
+OIDC sessions
+SAML limitations
+LDAP group inheritance
+effective permissions
+identity graphs
+blast-radius calculation
+session invalidation
+distributed state
+idempotent containment operations
+approval workflows
+auditability
+failure handling
+eventual consistency
+zero-trust principles
+
+And importantly, you aren't building 10 unrelated IAM features.
+
+You are building one thing:
+
+"If an employee's identity is compromised, give the IT administrator the ability to understand exactly what is at risk, contain the identity, and prove what access remains."
+
+That is a project I'd consider strong enough to be a flagship IAM project for a Java/Spring Boot resume, especially if you implement the actual Keycloak + OpenLDAP + OAuth/OIDC/SAML flows rather than making them mock integrations.
