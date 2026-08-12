@@ -13,11 +13,13 @@ target/
 # Log files
 *.log
 logs/
+accesszero.log
 
-# H2 / Embedded DB data files
+# H2 & Embedded DB data files
 *.db
 *.db.mv.db
 *.h2.db
+*.trace.db
 
 # IDE specific files
 .idea/
@@ -26,16 +28,46 @@ logs/
 .project
 .settings/
 .vscode/
+*.swp
+*.swo
 
 # Operating System specific files
 .DS_Store
 Thumbs.db
 Desktop.ini
 
-# Docker local data directories
+# Docker & Container local data directories
 docker-data/
 postgres_data/
+ldap_data/
+keycloak_data/
 
-# Environment configuration overrides
+# Terraform (Phase 12) Infrastructure as Code files
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+*.tfvars
+*.tfvars.json
+
+# Kubernetes & Cluster local configs (Phase 12)
+*.kubeconfig
+.kube/
+
+# CLI Build & Distribution outputs (Phase 11)
+dist/
+cli-dist/
+build/
+
+# Environment & Secret files
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
