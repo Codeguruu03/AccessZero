@@ -22,7 +22,7 @@ jobs:
           cache: maven
 
       - name: Compile and Run Unit & Integration Tests
-        run: mvn test --batch-mode
+        run: mvn test --batch-mode -Dsurefire.useFile=false -DtrimStackTrace=false
 
       - name: Build Spring Boot Application Package
         run: mvn package -DskipTests --batch-mode
