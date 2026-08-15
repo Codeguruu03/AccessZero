@@ -10,21 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: accesszerodb
-          POSTGRES_USER: sa
-          POSTGRES_PASSWORD: password123
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -52,12 +37,12 @@ jobs:
           pip install --quiet pyyaml
           python -c "import yaml, glob; [list(yaml.safe_load_all(open(f))) for f in glob.glob('k8s/*.yaml')]; print('All Kubernetes manifests are syntactically valid YAML!')"
           kubectl kustomize k8s/ > /dev/null
-          echo "Kubernetes kustomize compilation verified successfully!"
+          echo "Kubernetes kustomize manifests validated successfully!"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.9.5
           terraform_wrapper: false
 
       - name: Terraform Format and Validate
