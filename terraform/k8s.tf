@@ -1,3 +1,4 @@
+# AccessZero IAM Platform - Terraform Configuration
 resource "kubernetes_namespace" "accesszero" {
   metadata {
     name = var.namespace

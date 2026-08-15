@@ -1,3 +1,4 @@
+# AccessZero IAM Platform - Terraform Configuration
 output "namespace" {
   value       = var.namespace
   description = "Target Kubernetes namespace"

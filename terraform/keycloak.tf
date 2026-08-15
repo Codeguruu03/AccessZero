@@ -1,3 +1,4 @@
+# AccessZero IAM Platform - Terraform Configuration
 resource "kubernetes_config_map" "accesszero_config" {
   metadata {
     name      = "accesszero-config"

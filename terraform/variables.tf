@@ -1,3 +1,4 @@
+# AccessZero IAM Platform - Terraform Configuration
 variable "kubeconfig_path" {
   type        = string
   description = "Path to the kubeconfig file for local or remote cluster deployment"

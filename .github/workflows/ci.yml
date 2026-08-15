@@ -37,7 +37,7 @@ jobs:
           pip install --quiet pyyaml
           python -c "import yaml, glob; [list(yaml.safe_load_all(open(f))) for f in glob.glob('k8s/*.yaml')]; print('All Kubernetes manifests are syntactically valid YAML!')"
           kubectl kustomize k8s/ > /dev/null
-          echo "Kubernetes kustomize manifests validated successfully!"
+          echo "Kubernetes manifests and Kustomize overlays validated successfully!"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -48,6 +48,6 @@ jobs:
       - name: Terraform Format and Validate
         working-directory: ./terraform
         run: |
-          terraform fmt -check
+          terraform fmt -check -diff
           terraform init -backend=false
           terraform validate
