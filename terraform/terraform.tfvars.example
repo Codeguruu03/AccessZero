@@ -1,0 +1,6 @@
+kubeconfig_path         = "~/.kube/config"
+namespace               = "accesszero"
+keycloak_admin_user     = "admin"
+keycloak_admin_password = "adminpassword"
+ldap_admin_password     = "adminpassword"
+api_replicas            = 2

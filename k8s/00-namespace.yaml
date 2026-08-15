@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: accesszero
+  labels:
+    app.kubernetes.io/name: accesszero
+    app.kubernetes.io/part-of: identity-containment

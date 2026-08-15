@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: accesszero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:23.0.6
+          args: ["start-dev"]
+          ports:
+            - containerPort: 8081
+          env:
+            - name: KC_HTTP_PORT
+              value: "8081"
+          envFrom:
+            - secretRef:
+                name: accesszero-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: accesszero
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+  selector:
+    app: keycloak

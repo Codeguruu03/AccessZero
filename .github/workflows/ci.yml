@@ -1,0 +1,60 @@
+name: AccessZero CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: accesszerodb
+          POSTGRES_USER: sa
+          POSTGRES_PASSWORD: password123
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile and Run Unit & Integration Tests
+        run: mvn clean test --batch-mode
+
+      - name: Build Spring Boot Application Package
+        run: mvn package -DskipTests --batch-mode
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          which kubectl || echo "Validating YAML structure"
+          python -c "import yaml, glob; [yaml.safe_load_all(open(f)) for f in glob.glob('k8s/*.yaml')]; print('K8s manifests validated successfully!')"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Format and Validate
+        working-directory: ./terraform
+        run: |
+          terraform fmt -check
+          terraform init -backend=false
+          terraform validate

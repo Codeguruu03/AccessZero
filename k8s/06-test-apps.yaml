@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app-oidc
+  namespace: accesszero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app-oidc
+  template:
+    metadata:
+      labels:
+        app: test-app-oidc
+    spec:
+      containers:
+        - name: app
+          image: hashicorp/http-echo:latest
+          args: ["-text=AccessZero OIDC Test Gateway Application"]
+          ports:
+            - containerPort: 5678
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app-saml
+  namespace: accesszero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app-saml
+  template:
+    metadata:
+      labels:
+        app: test-app-saml
+    spec:
+      containers:
+        - name: app
+          image: hashicorp/http-echo:latest
+          args: ["-text=AccessZero SAML 2.0 SP Test Portal"]
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app-oidc
+  namespace: accesszero
+spec:
+  ports:
+    - port: 80
+      targetPort: 5678
+  selector:
+    app: test-app-oidc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app-saml
+  namespace: accesszero
+spec:
+  ports:
+    - port: 80
+      targetPort: 5678
+  selector:
+    app: test-app-saml
