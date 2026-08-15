@@ -1,5 +1,7 @@
 package com.accesszero.controller;
 
+import com.accesszero.domain.entity.UserEntity;
+import com.accesszero.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +18,9 @@ class IdentityControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     void testGetIdentities() throws Exception {
         mockMvc.perform(get("/api/v1/identities"))
@@ -27,9 +32,11 @@ class IdentityControllerTest {
 
     @Test
     void testGetIdentityById() throws Exception {
-        mockMvc.perform(get("/api/v1/identities/1"))
+        UserEntity user = userRepository.findByUsername("rahul.sharma").orElseThrow();
+
+        mockMvc.perform(get("/api/v1/identities/" + user.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.username").value("rahul.sharma"));
     }
 }

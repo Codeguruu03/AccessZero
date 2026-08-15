@@ -1,6 +1,8 @@
 package com.accesszero.controller;
 
+import com.accesszero.domain.entity.UserEntity;
 import com.accesszero.dto.ContainmentRequestDto;
+import com.accesszero.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +24,17 @@ class ContainmentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     void testContainmentEndpoints() throws Exception {
+        UserEntity user = userRepository.findByUsername("rahul.sharma").orElseThrow();
+
         // Request containment with emergency override
         ContainmentRequestDto request = new ContainmentRequestDto(
-                1L,
-                "rahul.sharma",
+                user.getId(),
+                user.getUsername(),
                 "it.tester",
                 "API Unit Test Containment",
                 true
