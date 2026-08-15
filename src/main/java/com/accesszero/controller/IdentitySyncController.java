@@ -21,4 +21,10 @@ public class IdentitySyncController {
         Map<String, Object> result = identitySyncService.syncIdentity(username);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/identity/{username}")
+    public ResponseEntity<Map<String, Object>> syncIdentityByPath(@PathVariable String username) {
+        Map<String, Object> result = identitySyncService.syncIdentity(username);
+        return ResponseEntity.ok(result);
+    }
 }

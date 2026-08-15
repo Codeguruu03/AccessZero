@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessZero — Identity Breach Containment & Access Revocation Platform</title>
+    <meta name="description" content="Instantly determine and eliminate everything a compromised employee can access across Keycloak, OpenLDAP, OAuth/OIDC, and SAML applications.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Background grid decoration -->
+    <div class="cyber-grid"></div>
+    <div class="cyber-glow-orb orb-1"></div>
+    <div class="cyber-glow-orb orb-2"></div>
+
+    <!-- Header Navigation -->
+    <header class="top-nav">
+        <div class="nav-container">
+            <div class="brand-group">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+                        <path d="M12 8v4"/>
+                        <path d="M12 16h.01"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">AccessZero</span>
+                    <span class="brand-subtitle">Identity Breach Containment Platform</span>
+                </div>
+                <span class="threat-badge pulse-anim">DEFCON 1 ACTIVE</span>
+            </div>
+
+            <div class="system-status-pills">
+                <div class="status-pill" title="Keycloak Identity Provider Status">
+                    <span class="pill-dot green"></span>
+                    <span>Keycloak: <strong>Active</strong></span>
+                </div>
+                <div class="status-pill" title="OpenLDAP Directory Status">
+                    <span class="pill-dot green"></span>
+                    <span>OpenLDAP: <strong>Active</strong></span>
+                </div>
+                <div class="status-pill" title="PostgreSQL Store & Graph Engine">
+                    <span class="pill-dot cyan"></span>
+                    <span>Graph Engine: <strong>Live</strong></span>
+                </div>
+            </div>
+
+            <div class="admin-selector-group">
+                <label for="admin-select">Operator:</label>
+                <select id="admin-select" class="cyber-select" onchange="switchAdmin(this.value)">
+                    <option value="anil.admin">anil.admin (IT Security)</option>
+                    <option value="priya.security">priya.security (SecOps Lead)</option>
+                    <option value="emergency.ciso">emergency.ciso (CISO / Incident Cmdr)</option>
+                </select>
+                <button id="btn-sync-all" class="btn btn-secondary btn-sm" onclick="syncCurrentIdentity()" title="Sync from Identity Providers">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Sync IdP
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-layout">
+        <!-- Identity Incident Hero Header -->
+        <section class="identity-hero-card">
+            <div class="identity-info-left">
+                <div class="identity-avatar">
+                    <span id="user-avatar-initials">RS</span>
+                    <div id="user-status-indicator" class="avatar-status-badge status-compromised">!</div>
+                </div>
+                <div class="identity-meta">
+                    <div class="identity-title-row">
+                        <h1 id="user-display-name">Rahul Sharma</h1>
+                        <span id="user-username-tag" class="mono-tag">@rahul.sharma</span>
+                        <span id="user-status-badge" class="badge badge-danger">SUSPECTED COMPROMISE</span>
+                    </div>
+                    <p class="identity-subtext">
+                        Department: <strong id="user-department">Finance</strong> | Email: <span id="user-email" class="mono-text">rahul.sharma@company.com</span> | Target User ID: <span id="user-id-val" class="mono-text">1</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Risk Score Radial Gauge -->
+            <div class="risk-gauge-container">
+                <div class="gauge-wrapper">
+                    <svg class="gauge-svg" viewBox="0 0 120 120">
+                        <circle class="gauge-bg" cx="60" cy="60" r="50" />
+                        <circle id="gauge-progress" class="gauge-progress" cx="60" cy="60" r="50" stroke-dasharray="314.15" stroke-dashoffset="0" />
+                    </svg>
+                    <div class="gauge-inner">
+                        <span id="risk-score-val" class="gauge-number">100</span>
+                        <span id="risk-score-lbl" class="gauge-label">CRITICAL</span>
+                    </div>
+                </div>
+                <div class="risk-meta">
+                    <span class="risk-title">Access Blast Radius</span>
+                    <span class="risk-desc">Destructive Potential: <strong>High</strong></span>
+                </div>
+            </div>
+
+            <!-- Identity Selector Dropdown -->
+            <div class="identity-switch-box">
+                <label for="identity-selector">Select Identity Incident:</label>
+                <select id="identity-selector" class="cyber-select" onchange="loadUserIdentity(this.value)">
+                    <option value="1">Rahul Sharma (Finance - CRITICAL)</option>
+                    <option value="2">Anil Admin (IT Security - NORMAL)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Metrics Counters Grid -->
+        <section class="metrics-grid">
+            <div class="metric-card card-sessions">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-sessions" class="metric-value">7</span>
+                    <span class="metric-label">Active Sessions</span>
+                </div>
+                <span class="metric-sub">Keycloak & App SSO</span>
+            </div>
+
+            <div class="metric-card card-tokens">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-tokens" class="metric-value">14</span>
+                    <span class="metric-label">OAuth Tokens</span>
+                </div>
+                <span class="metric-sub">Access & Refresh</span>
+            </div>
+
+            <div class="metric-card card-groups">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-groups" class="metric-value">5</span>
+                    <span class="metric-label">LDAP Groups</span>
+                </div>
+                <span id="metric-groups-priv" class="metric-sub text-warning">3 Privileged Groups</span>
+            </div>
+
+            <div class="metric-card card-apps">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-apps" class="metric-value">7</span>
+                    <span class="metric-label">Target Apps</span>
+                </div>
+                <span id="metric-apps-priv" class="metric-sub text-danger">4 Privileged</span>
+            </div>
+
+            <div class="metric-card card-saml">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-saml" class="metric-value">2</span>
+                    <span class="metric-label">SAML SSO Apps</span>
+                </div>
+                <span class="metric-sub">Workday, Salesforce</span>
+            </div>
+
+            <div class="metric-card card-paths highlight-blast">
+                <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div class="metric-data">
+                    <span id="metric-paths" class="metric-value">44</span>
+                    <span class="metric-label">Access Paths</span>
+                </div>
+                <span id="metric-paths-priv" class="metric-sub text-danger">Calculated Blast Radius</span>
+            </div>
+        </section>
+
+        <!-- Command Action Bar -->
+        <section class="command-action-bar">
+            <div class="command-left">
+                <span class="command-title">Incident Response Control:</span>
+                <span id="pending-approval-banner" class="approval-notice d-none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Operation #<span id="pending-op-id">0</span> is awaiting <strong>Secondary Admin Approval</strong>
+                </span>
+            </div>
+            <div class="command-buttons">
+                <button id="btn-recalculate" class="btn btn-secondary" onclick="recalculateBlastRadius()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z"/></svg>
+                    Calculate Blast Radius
+                </button>
+                <button id="btn-simulate" class="btn btn-cyan" onclick="openSimulationModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h5l3 5 4-10 3 5h5"/></svg>
+                    Simulate Containment
+                </button>
+                <button id="btn-contain" class="btn btn-danger pulse-killswitch" onclick="openContainmentModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    🚨 CONTAIN IDENTITY (Kill Switch)
+                </button>
+                <button id="btn-rollback" class="btn btn-outline" onclick="rollbackIdentity()" title="Restore identity from contained state">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Rollback / Restore
+                </button>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <button id="tab-btn-graph" class="tab-btn active" onclick="switchTab('graph')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Identity Access Graph & Blast Radius
+                </button>
+                <button id="tab-btn-verification" class="tab-btn" onclick="switchTab('verification')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Containment & Verification Matrix
+                </button>
+                <button id="tab-btn-audit" class="tab-btn" onclick="switchTab('audit')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Immutable Audit Trail (SHA-256)
+                </button>
+            </div>
+
+            <!-- Tab 1: Access Graph & Apps Table -->
+            <div id="tab-content-graph" class="tab-content active">
+                <div class="content-grid-2col">
+                    <!-- Graph Canvas Visualizer -->
+                    <div class="panel-card graph-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3>Identity Access Topology</h3>
+                                <span class="panel-badge">Directed Graph</span>
+                            </div>
+                            <div class="graph-view-toggles">
+                                <button id="btn-view-canvas" class="btn btn-sm btn-active" onclick="toggleGraphView('canvas')">Interactive Graph</button>
+                                <button id="btn-view-mermaid" class="btn btn-sm" onclick="toggleGraphView('mermaid')">Mermaid Diagram</button>
+                            </div>
+                        </div>
+                        <div id="canvas-graph-container" class="graph-display-area">
+                            <canvas id="identity-graph-canvas"></canvas>
+                            <div id="graph-node-tooltip" class="graph-tooltip d-none"></div>
+                        </div>
+                        <div id="mermaid-graph-container" class="mermaid-display-area d-none">
+                            <pre><code id="mermaid-code-block" class="language-mermaid">loading graph...</code></pre>
+                            <button class="btn btn-sm btn-secondary copy-btn" onclick="copyMermaidCode()">Copy Diagram Code</button>
+                        </div>
+                        <div class="graph-legend">
+                            <span class="legend-item"><span class="legend-dot node-user"></span> User</span>
+                            <span class="legend-item"><span class="legend-dot node-group"></span> LDAP Group</span>
+                            <span class="legend-item"><span class="legend-dot node-role"></span> Role</span>
+                            <span class="legend-item"><span class="legend-dot node-session"></span> Active Session</span>
+                            <span class="legend-item"><span class="legend-dot node-token"></span> OAuth Token</span>
+                            <span class="legend-item"><span class="legend-dot node-saml"></span> SAML SSO</span>
+                            <span class="legend-item"><span class="legend-dot node-app"></span> Application</span>
+                        </div>
+                    </div>
+
+                    <!-- Affected Applications Table -->
+                    <div class="panel-card apps-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3>Affected Applications at Risk</h3>
+                                <span id="affected-apps-count-badge" class="panel-badge badge-danger">7 Apps Impacted</span>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="cyber-table">
+                                <thead>
+                                    <tr>
+                                        <th>Application</th>
+                                        <th>Protocol</th>
+                                        <th>Sensitivity</th>
+                                        <th>Access Paths</th>
+                                        <th>Risk Impact</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="affected-apps-table-body">
+                                    <!-- Dynamic App Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Containment & Verification Results -->
+            <div id="tab-content-verification" class="tab-content">
+                <div class="verification-container">
+                    <!-- Containment Stepper -->
+                    <div class="panel-card stepper-panel">
+                        <div class="panel-header">
+                            <h3>5-Step Containment & Verification Pipeline</h3>
+                            <span id="pipeline-status-badge" class="badge badge-success">READY</span>
+                        </div>
+                        <div class="stepper-track">
+                            <div id="step-1" class="step-item completed">
+                                <div class="step-circle">1</div>
+                                <div class="step-label">Disable Keycloak</div>
+                                <div class="step-desc">Account -> Enabled=False</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div id="step-2" class="step-item completed">
+                                <div class="step-circle">2</div>
+                                <div class="step-label">Revoke OAuth/OIDC</div>
+                                <div class="step-desc">Tokens & Sessions Purged</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div id="step-3" class="step-item completed">
+                                <div class="step-circle">3</div>
+                                <div class="step-label">LDAP Quarantine</div>
+                                <div class="step-desc">Strip Groups -> cn=quarantined</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div id="step-4" class="step-item completed">
+                                <div class="step-circle">4</div>
+                                <div class="step-label">SAML SSO Contain</div>
+                                <div class="step-desc">Deactivate App SSO Access</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div id="step-5" class="step-item completed">
+                                <div class="step-circle">5</div>
+                                <div class="step-label">Verify Zero Access</div>
+                                <div class="step-desc">Multi-Provider Audit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Multi-Provider Verification Matrix -->
+                    <div class="panel-card matrix-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3>Multi-Provider Containment Verification Matrix</h3>
+                                <span id="overall-containment-badge" class="badge badge-warning">PARTIALLY CONTAINED</span>
+                            </div>
+                            <button class="btn btn-sm btn-secondary" onclick="reverifyZeroAccess()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                Re-verify Zero Access
+                            </button>
+                        </div>
+
+                        <div class="matrix-grid">
+                            <!-- Keycloak Card -->
+                            <div class="matrix-card">
+                                <div class="matrix-card-header">
+                                    <span class="provider-title">Keycloak IdP</span>
+                                    <span id="verif-status-keycloak" class="badge badge-success">CONTAINED</span>
+                                </div>
+                                <ul id="verif-items-keycloak" class="verif-check-list">
+                                    <li><span class="check-icon">✓</span> User account disabled (Enabled=False)</li>
+                                    <li><span class="check-icon">✓</span> Active SSO sessions terminated (0 remaining)</li>
+                                    <li><span class="check-icon">✓</span> Password & credential auth blocked</li>
+                                </ul>
+                            </div>
+
+                            <!-- OpenLDAP Card -->
+                            <div class="matrix-card">
+                                <div class="matrix-card-header">
+                                    <span class="provider-title">OpenLDAP Directory</span>
+                                    <span id="verif-status-ldap" class="badge badge-success">CONTAINED</span>
+                                </div>
+                                <ul id="verif-items-ldap" class="verif-check-list">
+                                    <li><span class="check-icon">✓</span> Removed from 'finance' privileged group</li>
+                                    <li><span class="check-icon">✓</span> Removed from 'payroll-admin' privileged group</li>
+                                    <li><span class="check-icon">✓</span> Removed from 'vpn-users' privileged group</li>
+                                    <li><span class="check-icon">✓</span> Assigned to 'cn=quarantined' perimeter group</li>
+                                </ul>
+                            </div>
+
+                            <!-- OAuth / OIDC Card -->
+                            <div class="matrix-card">
+                                <div class="matrix-card-header">
+                                    <span class="provider-title">OAuth 2.0 / OIDC</span>
+                                    <span id="verif-status-oauth" class="badge badge-success">CONTAINED</span>
+                                </div>
+                                <ul id="verif-items-oauth" class="verif-check-list">
+                                    <li><span class="check-icon">✓</span> 14 Refresh & Access tokens invalidated</li>
+                                    <li><span class="check-icon">✓</span> 7 active user gateway sessions killed</li>
+                                    <li><span class="check-icon">✓</span> Token introspection queries return active: false</li>
+                                </ul>
+                            </div>
+
+                            <!-- SAML 2.0 Card -->
+                            <div class="matrix-card highlight-partial">
+                                <div class="matrix-card-header">
+                                    <span class="provider-title">SAML 2.0 Federated Apps</span>
+                                    <span id="verif-status-saml" class="badge badge-warning">PARTIAL</span>
+                                </div>
+                                <ul id="verif-items-saml" class="verif-check-list">
+                                    <li><span class="check-icon">✓</span> IdP-Initiated SAML SSO assignments disabled</li>
+                                    <li><span class="warn-icon">⚠</span> Workday SAML: Existing local session cookie remains active until TTL expiry</li>
+                                    <li><span class="warn-icon">⚠</span> Salesforce SAML: Requires application-side console session revocation</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Real World SAML Residual Risk Alert -->
+                        <div id="residual-risk-callout" class="risk-callout-box">
+                            <div class="callout-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <div class="callout-content">
+                                <h4>Real-World IAM Nuance: Residual Local Application Sessions Detected</h4>
+                                <p>SAML 2.0 does not guarantee universal remote termination of downstream sessions already cached inside third-party SaaS apps. AccessZero has isolated all IdP, LDAP, and OAuth boundaries. The following manual steps or timeouts are required:</p>
+                                <ul id="residual-risk-items">
+                                    <li><strong>Workday SAML:</strong> Application requires local session expiry (Session TTL: ~45m remaining) or manual admin kill in Workday Security Console.</li>
+                                    <li><strong>Salesforce SAML:</strong> Application requires local admin session termination or wait for token expiration.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Immutable Audit Trail -->
+            <div id="tab-content-audit" class="tab-content">
+                <div class="panel-card audit-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>Cryptographically Signed Audit Trail</h3>
+                            <span class="panel-badge">SHA-256 Tamper-Proof</span>
+                        </div>
+                        <div class="audit-search-box">
+                            <input type="text" id="audit-search-input" class="cyber-input" placeholder="Search actor, action, hash..." onkeyup="filterAuditLogs()">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Actor</th>
+                                    <th>Action</th>
+                                    <th>Target Identity</th>
+                                    <th>Result</th>
+                                    <th>SHA-256 Checksum</th>
+                                    <th>Inspect</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-table-body">
+                                <!-- Dynamic Audit Records -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal 1: Containment Simulation ("What-If?") -->
+    <div id="modal-simulation" class="modal-backdrop d-none">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-badge-cyan">SIMULATION MODE</span>
+                    <h2>Non-Destructive Containment Simulation</h2>
+                </div>
+                <button class="btn-close" onclick="closeSimulationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="simulation-alert-banner">
+                    <p>Simulating containment impact on identity <strong id="sim-target-username">rahul.sharma</strong>. No changes will be committed to identity providers.</p>
+                </div>
+
+                <div class="sim-metrics-row">
+                    <div class="sim-metric">
+                        <span class="sim-num text-danger" id="sim-disruption-score">85</span>
+                        <span class="sim-lbl">Disruption Score</span>
+                    </div>
+                    <div class="sim-metric">
+                        <span class="sim-num text-warning" id="sim-disruption-level">HIGH</span>
+                        <span class="sim-lbl">Disruption Level</span>
+                    </div>
+                    <div class="sim-metric">
+                        <span class="sim-num text-cyan" id="sim-approval-req">YES</span>
+                        <span class="sim-lbl">2-Person Approval</span>
+                    </div>
+                </div>
+
+                <h4 class="mt-3 mb-2">Simulated Actions Plan:</h4>
+                <div class="sim-actions-list" id="sim-actions-container">
+                    <!-- Actions summary -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSimulationModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="proceedFromSimulationToContain()">
+                    Proceed to 🚨 Contain Identity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: 🚨 Contain Identity Kill Switch & 2-Person Approval -->
+    <div id="modal-containment" class="modal-backdrop d-none">
+        <div class="modal-card modal-danger">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-badge-danger">DEFCON 1 INTERVENTION</span>
+                    <h2>🚨 Contain Identity Kill Switch</h2>
+                </div>
+                <button class="btn-close" onclick="closeContainmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="danger-box">
+                    <strong>WARNING:</strong> This action will immediately terminate active sessions, invalidate all OAuth refresh tokens, strip privileged LDAP memberships, and isolate identity <strong id="contain-target-username">rahul.sharma</strong> across all enterprise identity stores.
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="contain-reason-input">Incident Containment Reason / SOC Ticket:</label>
+                    <input type="text" id="contain-reason-input" class="cyber-input" value="Suspected credential compromise detected by SOC alert #SEC-8492">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="emergency-override-checkbox" onchange="toggleOverrideInfo()">
+                        <span class="checkbox-custom"></span>
+                        <span class="text-danger"><strong>Emergency Override (Bypass 2-Person Approval)</strong></span>
+                    </label>
+                    <p id="override-note" class="form-subtext text-muted">
+                        Standard enterprise policy requires a secondary security administrator to approve containment of privileged accounts. Check this only for active high-severity breaches.
+                    </p>
+                </div>
+
+                <!-- Approval Section when operation is pending -->
+                <div id="approval-box-section" class="approval-action-box d-none mt-3">
+                    <h4>Secondary Admin Approval Required</h4>
+                    <p>Current logged in operator: <strong id="current-approver-display">priya.security</strong></p>
+                    <div class="form-group mt-2">
+                        <input type="text" id="approval-notes-input" class="cyber-input" placeholder="Approval justification / SOC incident review notes...">
+                    </div>
+                </div>
+
+                <!-- Live Multi-Step Execution Progress (during kill switch) -->
+                <div id="execution-progress-container" class="execution-progress d-none mt-3">
+                    <div class="progress-bar-glow">
+                        <div id="execution-progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div id="execution-status-text" class="execution-status-msg mono-text">
+                        Initiating zero-trust revocation sequence...
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeContainmentModal()">Cancel</button>
+                <button id="btn-submit-contain" class="btn btn-danger" onclick="submitContainmentRequest()">
+                    Execute Containment Workflow
+                </button>
+                <button id="btn-submit-approval" class="btn btn-success d-none" onclick="submitContainmentApproval()">
+                    ✓ Approve & Execute Containment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Audit Payload Inspector -->
+    <div id="modal-audit-inspect" class="modal-backdrop d-none">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-badge-cyan">IMMUTABLE LOG RECORD</span>
+                    <h2>Audit Record Details</h2>
+                </div>
+                <button class="btn-close" onclick="closeAuditInspectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="audit-meta-grid">
+                    <div><strong>Event ID:</strong> <span id="inspect-id" class="mono-text">-</span></div>
+                    <div><strong>Timestamp:</strong> <span id="inspect-time" class="mono-text">-</span></div>
+                    <div><strong>Actor:</strong> <span id="inspect-actor" class="mono-text">-</span></div>
+                    <div><strong>Action:</strong> <span id="inspect-action" class="mono-text">-</span></div>
+                    <div><strong>Target:</strong> <span id="inspect-target" class="mono-text">-</span></div>
+                    <div><strong>Result:</strong> <span id="inspect-result" class="mono-text">-</span></div>
+                </div>
+                <div class="mt-3">
+                    <strong>Cryptographic SHA-256 Checksum:</strong>
+                    <div id="inspect-checksum" class="checksum-box mono-text">-</div>
+                </div>
+                <div class="mt-3">
+                    <strong>Payload JSON Details:</strong>
+                    <pre><code id="inspect-json" class="json-box">{}</code></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAuditInspectModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-notification" class="cyber-toast d-none">
+        <div id="toast-icon" class="toast-icon">✓</div>
+        <div id="toast-message" class="toast-message">Containment operation executed successfully.</div>
+    </div>
+
+    <!-- JavaScript Bundle -->
+    <script src="/js/app.js"></script>
+</body>
+</html>

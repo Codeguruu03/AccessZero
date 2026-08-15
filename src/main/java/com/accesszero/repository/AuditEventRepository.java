@@ -11,4 +11,6 @@ public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Lo
     List<AuditEventEntity> findByOperationId(Long operationId);
     List<AuditEventEntity> findByActor(String actor);
     List<AuditEventEntity> findByTarget(String target);
+    List<AuditEventEntity> findByTargetOrderByTimestampDesc(String target);
+    List<AuditEventEntity> findAllByOrderByTimestampDesc();
 }

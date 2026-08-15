@@ -13,4 +13,5 @@ public interface ContainmentOperationRepository extends JpaRepository<Containmen
     List<ContainmentOperationEntity> findByTargetUserId(Long targetUserId);
     Optional<ContainmentOperationEntity> findFirstByTargetUserIdOrderByCreatedAtDesc(Long targetUserId);
     List<ContainmentOperationEntity> findByStatus(ContainmentStatus status);
+    List<ContainmentOperationEntity> findAllByOrderByCreatedAtDesc();
 }
