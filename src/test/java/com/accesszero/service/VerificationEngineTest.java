@@ -1,6 +1,7 @@
 package com.accesszero.service;
 
 import com.accesszero.domain.entity.UserEntity;
+import com.accesszero.domain.enums.UserStatus;
 import com.accesszero.dto.VerificationResultDto;
 import com.accesszero.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -26,21 +27,30 @@ class VerificationEngineTest {
         assertTrue(userOpt.isPresent());
 
         UserEntity user = userOpt.get();
-        VerificationResultDto result = verificationEngine.verifyContainment(1L, user.getId(), "test.verifier");
 
-        assertNotNull(result);
-        assertEquals("rahul.sharma", result.username());
-        assertNotNull(result.overallStatus());
-        assertNotNull(result.providerResults());
-        assertTrue(result.providerResults().containsKey("KEYCLOAK"));
-        assertTrue(result.providerResults().containsKey("OPENLDAP"));
-        assertTrue(result.providerResults().containsKey("OAUTH_OIDC"));
-        assertTrue(result.providerResults().containsKey("SAML_SSO"));
+        // 1. When user is active/uncontained -> verification detects uncontained state
+        VerificationResultDto preResult = verificationEngine.verifyContainment(1L, user.getId(), "test.verifier");
+        assertNotNull(preResult);
+        assertEquals("rahul.sharma", preResult.username());
+        assertNotNull(preResult.overallStatus());
+        assertNotNull(preResult.providerResults());
+        assertTrue(preResult.providerResults().containsKey("KEYCLOAK"));
+        assertTrue(preResult.providerResults().containsKey("OPENLDAP"));
+        assertTrue(preResult.providerResults().containsKey("OAUTH_OIDC"));
+        assertTrue(preResult.providerResults().containsKey("SAML_SSO"));
 
-        // Validate SAML residual risk warning logic
-        if (result.requiresManualActionCount() > 0) {
-            assertEquals("PARTIAL", result.overallStatus());
-            assertFalse(result.remainingRisks().isEmpty());
-        }
+        // 2. When user is set to CONTAINED -> verification evaluates SAML residual risks
+        user.setStatus(UserStatus.CONTAINED);
+        userRepository.save(user);
+
+        VerificationResultDto postResult = verificationEngine.verifyContainment(1L, user.getId(), "test.verifier");
+        assertNotNull(postResult);
+        assertEquals("PARTIAL", postResult.overallStatus());
+        assertTrue(postResult.requiresManualActionCount() > 0);
+        assertFalse(postResult.remainingRisks().isEmpty());
+
+        // Restore user to active
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
     }
 }

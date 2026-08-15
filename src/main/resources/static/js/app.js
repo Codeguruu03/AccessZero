@@ -156,11 +156,12 @@ function renderAffectedAppsTable(apps) {
 
     apps.forEach(app => {
         const tr = document.createElement('tr');
-        const isPriv = app.privileged;
+        const isPriv = app.isPrivileged !== undefined ? app.isPrivileged : app.privileged;
+        const appName = app.name || app.applicationName || 'Application';
         const sensBadgeClass = app.sensitivityLevel === 'CRITICAL' ? 'badge-danger' : (app.sensitivityLevel === 'HIGH' ? 'badge-warning' : 'badge-info');
 
         tr.innerHTML = `
-            <td><strong>${escapeHtml(app.applicationName)}</strong></td>
+            <td><strong>${escapeHtml(appName)}</strong></td>
             <td><span class="mono-tag">${escapeHtml(app.type || 'OIDC')}</span></td>
             <td><span class="badge ${sensBadgeClass}">${escapeHtml(app.sensitivityLevel)}</span></td>
             <td><span class="mono-text">${app.accessPathCount || 1} paths</span></td>
