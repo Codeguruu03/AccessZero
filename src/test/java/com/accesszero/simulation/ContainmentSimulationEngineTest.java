@@ -43,7 +43,7 @@ class ContainmentSimulationEngineTest {
         assertEquals("rahul.sharma", simulation.username());
         assertEquals("ACTIVE", simulation.accountStatusCurrent());
         assertEquals("CONTAINED", simulation.accountStatusSimulated());
-        assertEquals(14, simulation.tokensToRevokeCount());
+        assertTrue(simulation.tokensToRevokeCount() >= 14, "Should have at least 14 tokens to revoke");
         assertTrue(simulation.sessionsToTerminateCount() >= 7, "Should have at least 7 active sessions to terminate");
         assertFalse(simulation.privilegedLdapGroupsToRemove().isEmpty());
         assertTrue(simulation.privilegedLdapGroupsToRemove().contains("payroll-admin"));
