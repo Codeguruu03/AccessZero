@@ -221,7 +221,7 @@ public class ContainmentEngine {
 
     @Transactional
     public ContainmentResultDto executeContainmentWorkflow(ContainmentOperationEntity operation, UserEntity user, String executor) {
-        log.info("🚨 EXECUTING KILL SWITCH CONTAINMENT WORKFLOW for User: [{}] (Op #{})", user.getUsername(), operation.getId());
+        log.info("[EMERGENCY] EXECUTING KILL SWITCH CONTAINMENT WORKFLOW for User: [{}] (Op #{})", user.getUsername(), operation.getId());
         List<String> actionsExecuted = new ArrayList<>();
 
         // Transition: CONTAINING
@@ -229,11 +229,11 @@ public class ContainmentEngine {
         user.setStatus(UserStatus.CONTAINED);
         userRepository.save(user);
 
-        // Step 1 — Disable Identity in Keycloak
+        // Step 1 - Disable Identity in Keycloak
         boolean kcDisabled = keycloakAdminAdapter.disableUser(user.getUsername());
         actionsExecuted.add(String.format("Step 1: Keycloak User Account [%s] set to ENABLED=FALSE (Success: %s)", user.getUsername(), kcDisabled));
 
-        // Step 2 — Revoke OAuth/OIDC Access (tokens + sessions)
+        // Step 2 - Revoke OAuth/OIDC Access (tokens + sessions)
         boolean sessionsTerminated = keycloakAdminAdapter.logoutUserSessions(user.getUsername());
         List<UserSessionEntity> sessions = userSessionRepository.findByUserId(user.getId());
         for (UserSessionEntity s : sessions) {
@@ -247,7 +247,7 @@ public class ContainmentEngine {
         }
         actionsExecuted.add(String.format("Step 2: Revoked %d OAuth tokens and terminated %d active sessions", tokens.size(), sessions.size()));
 
-        // Step 3 — LDAP Containment (strip privileged groups, assign quarantine)
+        // Step 3 - LDAP Containment (strip privileged groups, assign quarantine)
         List<LdapGroupRepresentation> ldapGroups = ldapDirectoryAdapter.getUserGroupMemberships(user.getUsername());
         List<String> privilegedGroups = ldapGroups.stream()
                 .filter(LdapGroupRepresentation::isPrivileged)
@@ -257,7 +257,7 @@ public class ContainmentEngine {
         List<String> removedGroups = ldapDirectoryAdapter.containLdapIdentity(user.getUsername(), privilegedGroups);
         actionsExecuted.add(String.format("Step 3: Stripped LDAP privileged groups %s and assigned user to 'cn=quarantined'", removedGroups));
 
-        // Step 4 — SAML Containment (mark access paths revoked where possible)
+        // Step 4 - SAML Containment (mark access paths revoked where possible)
         List<AccessPathEntity> paths = accessPathResolverService.resolveAndPersistAccessPaths(user.getId());
         int revokedCount = 0;
         int manualActionCount = 0;
@@ -275,7 +275,7 @@ public class ContainmentEngine {
         }
         actionsExecuted.add(String.format("Step 4: Revoked %d of %d effective access paths across enterprise apps", revokedCount, paths.size()));
 
-        // Step 5 — Verify Zero Access
+        // Step 5 - Verify Zero Access
         operation.setStatus(ContainmentStatus.VERIFYING);
         VerificationResultDto verification = verificationEngine.verifyContainment(operation.getId(), user.getId(), executor);
         actionsExecuted.add(String.format("Step 5: Verification complete -> Overall Result: %s (Revoked: %d/%d, Manual Action Items: %d)",
