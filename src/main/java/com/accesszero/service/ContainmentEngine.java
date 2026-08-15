@@ -154,26 +154,27 @@ public class ContainmentEngine {
 
         operation.setApprovedBy(approval.approvedBy());
         operation.setStatus(ContainmentStatus.CONTAINING);
-        operation = containmentOperationRepository.save(operation);
+        ContainmentOperationEntity savedOp = containmentOperationRepository.save(operation);
 
-        UserEntity user = userRepository.findById(operation.getTargetUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + operation.getTargetUserId()));
+        Long targetUserId = savedOp.getTargetUserId();
+        UserEntity user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + targetUserId));
 
         auditService.recordEvent(
-                operation.getId(),
+                savedOp.getId(),
                 approval.approvedBy(),
                 "APPROVE_CONTAINMENT",
                 user.getUsername(),
                 "APPROVED",
                 Map.of(
-                        "operationId", operation.getId(),
-                        "requestedBy", operation.getRequestedBy(),
+                        "operationId", savedOp.getId(),
+                        "requestedBy", savedOp.getRequestedBy(),
                         "approvedBy", approval.approvedBy(),
                         "notes", approval.notes() != null ? approval.notes() : ""
                 )
         );
 
-        return executeContainmentWorkflow(operation, user, approval.approvedBy());
+        return executeContainmentWorkflow(savedOp, user, approval.approvedBy());
     }
 
     @Transactional

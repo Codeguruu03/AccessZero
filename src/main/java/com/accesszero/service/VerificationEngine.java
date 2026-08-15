@@ -144,7 +144,7 @@ public class VerificationEngine {
             if (appOpt.isPresent()) {
                 ApplicationEntity app = appOpt.get();
                 if (app.getType() == ApplicationType.SAML || app.getType() == ApplicationType.INTERNAL) {
-                    if (app.isRequiresLocalLogout()) {
+                    if (!app.isSupportsRemoteLogout()) {
                         manualActionCount++;
                         String riskMsg = String.format("%s: Existing local application session cannot be remotely terminated. Requires local session expiry.", app.getName());
                         String actionStep = String.format("Admin Action: Terminate local user session in %s admin console or wait for local JWT/session cookie expiration.", app.getName());
