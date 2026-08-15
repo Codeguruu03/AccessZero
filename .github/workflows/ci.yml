@@ -23,8 +23,8 @@ jobs:
       - name: Compile and Run Unit & Integration Tests
         run: |
           mvn test --batch-mode > mvn-output.log 2>&1 || {
-            ERR_MSG=$(tail -n 20 mvn-output.log | tr '\n' ' ' | sed 's/"/\\"/g')
-            echo "::error title=Maven Test Failure::$ERR_MSG"
+            FAIL_DETAIL=$(grep -h -A 10 "FAILURE!" target/surefire-reports/*.txt | tr '\n' ' ' | sed 's/"/\\"/g')
+            echo "::error title=Failed Test Detail::$FAIL_DETAIL"
             cat mvn-output.log
             exit 1
           }
