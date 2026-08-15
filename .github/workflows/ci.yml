@@ -23,10 +23,8 @@ jobs:
       - name: Compile and Run Unit & Integration Tests
         run: |
           mvn test --batch-mode > mvn-output.log 2>&1 || {
-            echo "## ❌ Maven Test Failure Log" >> $GITHUB_STEP_SUMMARY
-            echo '```text' >> $GITHUB_STEP_SUMMARY
-            tail -n 120 mvn-output.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            ERR_MSG=$(tail -n 20 mvn-output.log | tr '\n' ' ' | sed 's/"/\\"/g')
+            echo "::error title=Maven Test Failure::$ERR_MSG"
             cat mvn-output.log
             exit 1
           }
