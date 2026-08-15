@@ -1,9 +1,11 @@
 package com.accesszero.simulation;
 
 import com.accesszero.domain.entity.UserEntity;
+import com.accesszero.domain.enums.UserStatus;
 import com.accesszero.dto.ContainmentSimulationDto;
 import com.accesszero.repository.UserRepository;
 import com.accesszero.service.ContainmentSimulationEngine;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +22,14 @@ class ContainmentSimulationEngineTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.findByUsername("rahul.sharma").ifPresent(u -> {
+            u.setStatus(UserStatus.ACTIVE);
+            userRepository.save(u);
+        });
+    }
 
     @Test
     void testSimulateContainmentForRahul() {
