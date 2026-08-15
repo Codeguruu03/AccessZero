@@ -42,10 +42,16 @@ jobs:
       - name: Build Spring Boot Application Package
         run: mvn package -DskipTests --batch-mode
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Validate Kubernetes Manifests
         run: |
-          which kubectl || echo "Validating YAML structure"
-          python -c "import yaml, glob; [yaml.safe_load_all(open(f)) for f in glob.glob('k8s/*.yaml')]; print('K8s manifests validated successfully!')"
+          pip install --quiet pyyaml
+          python -c "import yaml, glob; [list(yaml.safe_load_all(open(f))) for f in glob.glob('k8s/*.yaml')]; print('All Kubernetes manifests are syntactically valid YAML!')"
+          which kubectl && kubectl apply --dry-run=client -k k8s/ || true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
