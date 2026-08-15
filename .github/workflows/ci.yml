@@ -19,10 +19,17 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
 
       - name: Compile and Run Unit & Integration Tests
-        run: mvn test --batch-mode -Dsurefire.useFile=false -DtrimStackTrace=false
+        run: |
+          mvn test --batch-mode > mvn-output.log 2>&1 || {
+            echo "## ❌ Maven Test Failure Log" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 mvn-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat mvn-output.log
+            exit 1
+          }
 
       - name: Build Spring Boot Application Package
         run: mvn package -DskipTests --batch-mode
